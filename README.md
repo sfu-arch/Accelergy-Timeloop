@@ -4,4 +4,4 @@ Using Docker:
 A docker with built-in tools is provided to get started in accelergy-timeloop-Docker-Version folder
 
 Native Installation:
-Acclergy-Timeloop with built-in tools is provided to get started in accelergy-timeloop-infrastructure folder
+Accelergy-Timeloop with built-in tools is provided to get started in accelergy-timeloop-infrastructure folder
