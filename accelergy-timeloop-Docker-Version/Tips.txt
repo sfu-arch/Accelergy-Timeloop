@@ -1,0 +1,37 @@
+To Implement Accelergy-Timeloop using Docker, do the followings:
+	Go to https://github.com/Accelergy-Project/timeloop-accelergy-exercises
+	Download the codes as Zip (See green button "<> Code")
+	Extract it in Home directory
+	Go to Home/timeloop-accelergy and open Terminal
+	Make a copy of the provided template docker compose file by typing the command "cp docker-compose.yaml.template docker-compose.yaml"
+	Run docker by typing the command "DOCKER_ARCH=amd64 docker compose up"
+	Right click on the second url shown at the end of the Terminal screen and open the link
+	On the browser, navigate to tutorial_exercises/01_accelergy_timeloop_2020_ispass and open README.md
+	This file shows how to run Accelergy-Timeloop examples 	
+	Navigate to timeloop/04-model-conv1d+oc-3levelspatial and open README.md
+	This file shows how to run the implemented DNN acclerator and mapping, which is written in 04-model-conv1d+oc-3levelspatial folder and map/cp
+	
+To implement DNN accelerator, do the followings:
+	Define the problem under problem directory (for example change the content of 04-model-conv1d+oc-3levelspatial/prob/conv1d+oc+ic.prob.yaml)
+	The problem in PyNET is as follows:
+		# Perform convolution
+		for c_in in range(number_of_input_channels): # input channels are like R, G, B and Y channels of pixels of an image
+		    for c_out in range(number_of_output_channels): # output channels are filters applied to an image like sharpening filter
+			for i in range(height_of_image):
+			    for j in range(width_of_image):
+				for h in range(height_of_kernel): # kernel is a small matrix (for example 3*3) which is slided over an image to apply the filter and extract features of the image
+				    for w in range(width_of_kernel):
+				        output[c_out, i, j] += input_image[c_in, i + h, j + w] * weight[c_out, h, w] + bias[c_out]
+
+		return output
+		To extract the parameters (c_in, c_out, width and height of kernel) of PyNET layers, navigate to model.py under Home/PyNET and see this line:
+		        self.conv_l1_d1 = ConvMultiBlock(4, 32, 3, instance_norm=False) # 3 = 3*3 kernel
+		To extract the width and height of the input image of PyNET layers, navigate to PyNET.py under Home/PyNET and see this line:
+		        transforms.Resize((1024, 1024)),  # Match training input size
+	Define the hardware architecture under arch directory (for example change the content of 04-model-conv1d+oc-3levelspatial/arch/3levelspatial.arch.yaml)
+		In hardware designing try to set the DRAM and SRAM size (size = depth * width) according to the available commercial DRAM and SRAM sizes 	
+	Define the hardware accelerator mapping under map directory (for example change the content of 04-model-conv1d+oc-3levelspatial/map/conv1d+oc+ic-3levelspatial-cp-ws.map.yaml)
+		In mapping:
+			Main Memory passes each row of an image to the Global Buffer, so it does this about the number of rows of the image for each input image channel, which is 1024
+			Global Buffer assigns corresponding weights to each pixel of the row and passes them to PEs for calculation, so it does this about the number of pixels of the row, which is 1024
+			PEs calculate the convolution by computing output[c_out, t, j] += input_image[c_in, t + h, j + w] * weight[c_out, h, w] + bias[c_out] for a 3*3 window of the input image
