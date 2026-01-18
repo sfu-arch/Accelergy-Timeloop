@@ -4,9 +4,10 @@ architecture:
       - name: System_top_level.MainMemory[1..1]
         class: DRAM
         attributes:
-            depth: 131072
-            width: 32768
+            depth: 536870912
+            width: 8
             datawidth: 8
+            block_size: 1
             has_power_gating: false
             n_banks: 2
             cluster_size: 1
@@ -24,19 +25,20 @@ architecture:
             cycle_seconds: 1e-09
             n_instances: 1
         required_actions:
-          - write
-          - leak
           - update
+          - leak
           - read
+          - write
         enabled: true
         area_scale: 1.0
         energy_scale: 1.0
       - name: System_top_level.GlobalBuffer[1..1]
         class: SRAM
         attributes:
-            depth: 65536
-            width: 512
+            depth: 1048576
+            width: 8
             datawidth: 8
+            block_size: 1
             has_power_gating: false
             n_banks: 2
             cluster_size: 1
@@ -54,10 +56,10 @@ architecture:
             cycle_seconds: 1e-09
             n_instances: 1
         required_actions:
-          - write
-          - leak
           - update
+          - leak
           - read
+          - write
         enabled: true
         area_scale: 1.0
         energy_scale: 1.0
@@ -87,11 +89,12 @@ architecture:
         area_scale: 1.0
         energy_scale: 1.0
       - name: System_top_level.RegisterFile[1..256]
-        class: regfile
+        class: SRAM
         attributes:
             depth: 64
             width: 8
             datawidth: 8
+            block_size: 1
             has_power_gating: false
             n_banks: 2
             cluster_size: 1
@@ -109,17 +112,17 @@ architecture:
             cycle_seconds: 1e-09
             n_instances: 1
         required_actions:
-          - write
-          - leak
           - update
+          - leak
           - read
+          - write
         enabled: true
         area_scale: 1.0
         energy_scale: 1.0
       - name: System_top_level.MACC[1..256]
         class: intmac
         attributes:
-            width: 8
+            width: 16
             has_power_gating: false
             meshX: 16
             meshY: 16

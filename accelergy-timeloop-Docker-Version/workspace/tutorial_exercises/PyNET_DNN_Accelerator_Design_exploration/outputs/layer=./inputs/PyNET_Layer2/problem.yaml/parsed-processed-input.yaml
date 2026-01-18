@@ -13,9 +13,10 @@ architecture:
           - name: MainMemory[1..1]
             class: DRAM
             attributes:
-                depth: 131072
-                width: 32768
+                depth: 536870912
+                width: 8
                 datawidth: 8
+                block_size: 1
                 has_power_gating: false
                 n_banks: 2
                 cluster_size: 1
@@ -29,17 +30,18 @@ architecture:
                 global_cycle_seconds: 1e-9
                 power_gated_at: null
             required_actions:
-              - write
-              - leak
               - update
+              - leak
               - read
+              - write
             enabled: true
           - name: GlobalBuffer[1..1]
             class: SRAM
             attributes:
-                depth: 65536
-                width: 512
+                depth: 1048576
+                width: 8
                 datawidth: 8
+                block_size: 1
                 has_power_gating: false
                 n_banks: 2
                 cluster_size: 1
@@ -53,10 +55,10 @@ architecture:
                 global_cycle_seconds: 1e-9
                 power_gated_at: null
             required_actions:
-              - write
-              - leak
               - update
+              - leak
               - read
+              - write
             enabled: true
           - name: inter_PE_spatial[1..1]
             class: dummy_storage
@@ -78,11 +80,12 @@ architecture:
                 power_gated_at: null
             enabled: true
           - name: RegisterFile[1..256]
-            class: regfile
+            class: SRAM
             attributes:
                 depth: 64
                 width: 8
                 datawidth: 8
+                block_size: 1
                 has_power_gating: false
                 n_banks: 2
                 cluster_size: 1
@@ -96,15 +99,15 @@ architecture:
                 global_cycle_seconds: 1e-9
                 power_gated_at: null
             required_actions:
-              - write
-              - leak
               - update
+              - leak
               - read
+              - write
             enabled: true
           - name: MACC[1..256]
             class: intmac
             attributes:
-                width: 8
+                width: 16
                 has_power_gating: false
                 meshX: 16
                 meshY: 16
@@ -118,16 +121,22 @@ architecture_constraints:
     targets:
       - target: MainMemory
         type: temporal
-        factors: I=1024,C=32
-        permutation: CI
+        permutation: IJCOHW
       - target: GlobalBuffer
         type: temporal
-        factors: J=1024,O=64
-        permutation: OJ
+        permutation: IJOC
+      - target: GlobalBuffer
+        type: bypass
+        bypass:
+          - Inputs
+          - Weights
+        keep:
+          - Outputs
+          - Bias
       - type: spatial
         target: inter_PE_spatial
-        factors: H=3,W=3
-        permutation: WH
+        factors: O=16,C=16
+        permutation: OC
       - factors: C=1,O=1,I=1,J=1,H=1,W=1
         permutation: COIJHW
         type: temporal
@@ -139,6 +148,10 @@ architecture_constraints:
           - Outputs
         type: bypass
         target: inter_PE_spatial
+      - target: RegisterFile
+        type: temporal
+        factors: H=3,W=3,C=1
+        permutation: HWC
 problem:
     version: '0.4'
     shape:

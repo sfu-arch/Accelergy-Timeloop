@@ -2,11 +2,12 @@ mapping:
   - target: RegisterFile
     type: datatype
     keep:
-      - Inputs
-    bypass:
       - Weights
+      - Inputs
       - Bias
       - Outputs
+    bypass:
+      []
   - target: inter_PE_spatial
     type: datatype
     keep:
@@ -19,12 +20,11 @@ mapping:
   - target: GlobalBuffer
     type: datatype
     keep:
-      - Weights
-      - Inputs
       - Bias
       - Outputs
     bypass:
-      []
+      - Weights
+      - Inputs
   - target: MainMemory
     type: datatype
     keep:
@@ -36,22 +36,22 @@ mapping:
       []
   - target: RegisterFile
     type: temporal
-    factors: C1 O1 I1 J1 H1 W1
-    permutation: COIJHW
+    factors: C1 O2 I2 J4 H3 W3
+    permutation: OIJHWC
   - target: inter_PE_spatial
     type: spatial
-    factors: C1 O1 I1 J1 H3 W3
-    permutation: WHCOIJ
-    split: 0
+    factors: C4 O16 I1 J4 H1 W1
+    permutation: OCJIHW
+    split: 1
   - target: inter_PE_spatial
     type: temporal
     factors: C1 O1 I1 J1 H1 W1
     permutation: COIJHW
   - target: GlobalBuffer
     type: temporal
-    factors: C1 O32 I1 J1024 H1 W1
-    permutation: OJCIHW
+    factors: C1 O1 I256 J1 H1 W1
+    permutation: ICOJHW
   - target: MainMemory
     type: temporal
-    factors: C4 O1 I1024 J1 H1 W1
-    permutation: CIOJHW
+    factors: C1 O1 I2 J64 H1 W1
+    permutation: IJCOHW
